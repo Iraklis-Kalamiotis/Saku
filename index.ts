@@ -1,4 +1,10 @@
-import { BotClient } from "./SakuClient";
+import { SakuClient } from "./src/SakuClient";
+import "dotenv/config"; // Load environment variables
 
-const client = new BotClient();
-client.start().catch(console.error);
+async function main() {
+	const client = new SakuClient(SakuClient.getClientOptions());
+    client.connect();
+    client.loadEvents();
+};
+
+main();
