@@ -3,15 +3,17 @@ import Redis from "ioredis";
 import type { CachedUserData, Clan } from "./types/user";
 import path from "path";
 import fs from 'fs';
+import Database from "./database/mongoose";
 
 export class SakuClient extends Client {
   public redis: Redis;
   public ws: any; 
+  public db: Database;
 
   constructor(options: ClientOptions) {
     super(options);
     this.redis = new Redis();
-    
+    this.db = new Database(process.env.MONGO_URI || 'mongodb://localhost:27017/saku', this);
 
     // this.on("packet", (msg) => {
     //   if (msg.author.id === "379267610564362243") {
@@ -48,7 +50,7 @@ export class SakuClient extends Client {
       } catch {}
     };
 
-    const user: User = this.users.get(userID) || (await this.rest.users.get(userID));
+    const user = this.users.get(userID) ?? await this.rest.users.get(userID);
 
     const freshData: CachedUserData = {
       id: user.id,
@@ -66,7 +68,6 @@ export class SakuClient extends Client {
     if (!cached || JSON.stringify(cached) !== JSON.stringify(freshData)) {
       await this.redis.set(cacheKey, JSON.stringify(freshData), "EX", 3600);
     }
-    console.log(freshData)
     return user;
   };
 
@@ -88,5 +89,10 @@ export class SakuClient extends Client {
         this.on(eventInstance.name, (...args) => eventInstance.run(...args));
       }
     }
+  };
+
+  async start(){
+    await this.connect();
+    await this.db.connect();
   };
 }

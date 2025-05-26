@@ -1,10 +1,16 @@
-import { SakuClient } from "./src/SakuClient";
-import "dotenv/config"; // Load environment variables
+// index.ts
+import Database from './src/database/mongoose';
+import { SakuClient } from './src/SakuClient';
+import dotenv from 'dotenv';
 
-async function main() {
-	const client = new SakuClient(SakuClient.getClientOptions());
-    client.connect();
-    client.loadEvents();
-};
+dotenv.config();
 
-main();
+
+(async () => {
+  const client = new SakuClient(SakuClient.getClientOptions());
+  client.start();
+  client.loadEvents()
+//   const db = new Database(process.env.MONGO_URI || 'mongodb://localhost:27017/saku', client);
+//   await db.connect();
+
+})();

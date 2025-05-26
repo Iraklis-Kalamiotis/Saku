@@ -17,9 +17,7 @@ export class PackerEvent extends ClientEvent<[RawPacket]> {
       data.author?.id ||
       data.member?.user?.id ||
       data.user?.id ||
-      data.user_id ||
-      data.id;
-  
+      data.user_id
     if (!userID) return;
   
     switch (t) {
@@ -32,7 +30,8 @@ export class PackerEvent extends ClientEvent<[RawPacket]> {
       case "VOICE_STATE_UPDATE":
       case "MESSAGE_REACTION_ADD":
       case "MESSAGE_REACTION_REMOVE":
-        await this.client.getUser(userID); //Cache User
+         let user = await this.client.getUser(userID); //Cache User
+            await this.client.db.syncUser(user.id, user)
         break;
     }
   }
